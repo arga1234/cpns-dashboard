@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "public": "build",
+    "site": "dashboard-verified-peserta-cpns-disdik-2024",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

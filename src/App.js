@@ -163,7 +163,7 @@ export default function App() {
       </div>
 
       {/* Stats */}
-      <div style={{ display: "flex", gap: 16, marginBottom: 20 }}>
+      <div style={{ display: "flex", flexWrap: "nowrap", overflow: "auto", gap: 16, marginBottom: 20 }}>
         <Card style={{ flex: 1, minWidth: 130, background: "#cce5ff" }}><Typography.Text strong>Total Peserta</Typography.Text><div>{stats.total}</div></Card>
         <Card style={{ flex: 1, minWidth: 130, background: "#d4edda" }}><Typography.Text strong>Sudah Join Group</Typography.Text><div>{stats.sudah}</div></Card>
         <Card style={{ flex: 1, minWidth: 130, background: "#f8d7da" }}><Typography.Text strong>Belum Join Group</Typography.Text><div>{stats.belum}</div></Card>

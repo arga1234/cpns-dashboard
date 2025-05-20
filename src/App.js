@@ -139,7 +139,7 @@ export default function App() {
     { title: "No Peserta", dataIndex: "id", key: "id" },
     { title: "Jabatan", dataIndex: "jabatan", key: "jabatan" },
     { title: "Sudah Join Group", dataIndex: "sudahJoin", key: "sudahJoin", render: val => (val ? "Sudah" : "Belum") },
-    { title: "GForm SPMT", dataIndex: "gForm", key: "gForm", render: val => (val ? "Sudah" : "Belum") }
+    { title: "Status GForm SPMT", dataIndex: "gForm", key: "gForm", render: val => (val ? "Sudah Mengisi" : "Belum Mengisi") }
   ];
 
   const percentageBelum = stats.total ? ((stats.belum / stats.total) * 100).toFixed(2) + "%" : "0%";

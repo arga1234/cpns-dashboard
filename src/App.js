@@ -167,7 +167,7 @@ export default function App() {
         <Card style={{ flex: 1, minWidth: 130, background: "#cce5ff" }}><Typography.Text strong>Total Peserta</Typography.Text><div>{stats.total}</div></Card>
         <Card style={{ flex: 1, minWidth: 130, background: "#d4edda" }}><Typography.Text strong>Sudah Join Group</Typography.Text><div>{stats.sudah}</div></Card>
         <Card style={{ flex: 1, minWidth: 130, background: "#f8d7da" }}><Typography.Text strong>Belum Join Group</Typography.Text><div>{stats.belum}</div></Card>
-        <Card style={{ flex: 1, minWidth: 130, background: "#fff3cd" }}><Typography.Text strong>Sudah Isi GForm</Typography.Text><div>{stats.sudahIsiGForm}</div></Card>
+        <Card style={{ flex: 1, minWidth: 130, background: "#fff3cd" }}><Typography.Text strong>Sudah Isi GForm SPMT</Typography.Text><div>{stats.sudahIsiGForm}</div></Card>
       </div>
 
       {/* Table */}

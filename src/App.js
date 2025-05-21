@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Table, Select, Layout, Typography, Card, Input, Modal, Form, Switch, Button, notification } from "antd";
+import { Table, Select, Layout, Typography, Card, Input, Modal, Form, Button, notification } from "antd";
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -42,7 +42,7 @@ const jabatanOptions = [
   "PENATA KELOLA SISTEM DAN TEKNOLOGI INFORMASI",
   "PENGEMBANG TEKNOLOGI PEMBELAJARAN AHLI PERTAMA",
   "PRANATA LABORATORIUM PENDIDIKAN TERAMPIL",
-  "PENATA BANGUNAN GEDUNG DAN PERMUKIMINAN",
+  "PENATA BANGUNAN GEDUNG DAN PERMUKIMAN",
   "PENATA LAKSANA BARANG TERAMPIL",
   "DOKUMENTALIS HUKUM"
 ];
@@ -158,25 +158,20 @@ export default function App() {
   const handleOk = async () => {
     try {
       const values = await form.validateFields();
-      // get IP (fallback unknown)
       let ip = 'unknown';
       try {
         const res = await fetch('https://api.ipify.org?format=json');
         const j = await res.json();
         ip = j.ip || ip;
       } catch {}
-      // block one-edit-per-IP across all participants
       const blockRef = doc(db, 'editIPs', ip);
       if ((await getDoc(blockRef)).exists()) {
         notification.error({ message: 'Gagal', description: 'IP ini sudah pernah edit, tidak dapat lagi edit peserta lain.' });
         return;
       }
-      // update participant record
       const recRef = doc(db, 'peserta-cpns-v2', editingRecord.id);
       await updateDoc(recRef, { sudahJoin: values.sudahJoin, gForm: values.gForm });
-      // record block
       await setDoc(blockRef, { timestamp: new Date() });
-      // audit log
       const logRef = doc(collection(db, 'editLogs'));
       await setDoc(logRef, {
         participantId: editingRecord.id,
@@ -262,11 +257,19 @@ export default function App() {
         cancelText="Batal"
       >
         <Form form={form} layout="vertical">
-          <Form.Item label="Sudah Join Group" name="sudahJoin" valuePropName="checked">
-            <Switch checkedChildren="Sudah" unCheckedChildren="Belum" />
+          <Form.Item label="Sudah Join Group" name="sudahJoin" rules={[{ required: true, message: 'Pilih status join group!' }]}
+            >
+            <Select placeholder="Pilih status">
+              <Option value={true}>Sudah</Option>
+              <Option value={false}>Belum</Option>
+            </Select>
           </Form.Item>
-          <Form.Item label="Status GForm SPMT" name="gForm" valuePropName="checked">
-            <Switch checkedChildren="Sudah Isi" unCheckedChildren="Belum Isi" />
+          <Form.Item label="Status GForm SPMT" name="gForm" rules={[{ required: true, message: 'Pilih status GForm!' }]}
+            >
+            <Select placeholder="Pilih status">
+              <Option value={true}>Sudah Mengisi</Option>
+              <Option value={false}>Belum Mengisi</Option>
+            </Select>
           </Form.Item>
         </Form>
       </Modal>

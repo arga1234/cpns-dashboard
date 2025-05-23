@@ -177,43 +177,74 @@ export default function App() {
   // Show edit modal
   const showEditModal = record => {
     setEditingRecord(record);
+    console.log(record)
     form.setFieldsValue({
       sudahJoin: record.sudahJoin,
       gForm: record.gForm,
-      isOwnBankDKIAccount: record.isOwnBankDKIAccount
+      isOwnBankDKIAccount: record.isOwnBankDKIAccount,
+      inginDibuatkanRekening: record.inginDibuatkanRekening || null
     });
     setIsModalVisible(true);
   };
 
-  // Handle save
-  const handleOk = async () => {
-    try {
-      const values = await form.validateFields();
-      let ip = 'unknown';
-      try { const res = await fetch('https://api.ipify.org?format=json'); const j = await res.json(); ip = j.ip || ip; } catch {}
-      const blockRef = doc(db, 'editIPs', ip);
-      if ((await getDoc(blockRef)).exists()) {
-        notification.error({ message: 'Gagal', description: 'IP ini sudah pernah edit.' });
-        return;
-      }
-      const recRef = doc(db, 'peserta-cpns-v2', editingRecord.id);
-      await updateDoc(recRef, {
-        sudahJoin: values.sudahJoin,
-        gForm: values.gForm,
-        isOwnBankDKIAccount: values.isOwnBankDKIAccount
+// Handle save
+const handleOk = async () => {
+  const localKey = `edit-submitted-${editingRecord.id}`;
+  const stored = localStorage.getItem(localKey);
+  const now = new Date();
+  const today = now.toISOString().split('T')[0]; // format YYYY-MM-DD
+
+  // 1) Cek di localStorage
+  if (stored) {
+    const { date: storedDate } = JSON.parse(stored);
+    if (storedDate === today) {
+      notification.warning({
+        message: "Sudah Pernah Submit",
+        description: "Anda hanya bisa melakukan edit satu kali dalam sehari."
       });
-      await setDoc(blockRef, { timestamp: new Date() });
-      const logRef = doc(collection(db, 'editLogs'));
-      await setDoc(logRef, { participantId: editingRecord.id, ip, changes: values, timestamp: new Date() });
-      notification.success({ message: 'Berhasil', description: 'Perubahan tersimpan.' });
-      fetchStats(new URLSearchParams(window.location.search).get('isAdmin') === 'true');
-      fetchPage(currentPage, pageSize);
-      setIsModalVisible(false);
-    } catch (err) {
-      console.error('Update failed:', err);
-      notification.error({ message: 'Error', description: 'Gagal menyimpan perubahan.' });
+      return; // stop di sini
     }
-  };
+  }
+
+  try {
+    // 2) Lanjut ke validasi form & update Firestore
+    const values = await form.validateFields();
+    let ip = 'unknown';
+    try {
+      const res = await fetch('https://api.ipify.org?format=json');
+      const j = await res.json();
+      ip = j.ip || ip;
+    } catch {}
+
+    const recRef = doc(db, 'peserta-cpns-v2', editingRecord.id);
+    await updateDoc(recRef, {
+      sudahJoin: values.sudahJoin,
+      gForm: values.gForm,
+      isOwnBankDKIAccount: values.isOwnBankDKIAccount,
+      inginDibuatkanRekening: values.inginDibuatkanRekening
+    });
+    const logRef = doc(collection(db, 'editLogs'));
+    await setDoc(logRef, {
+      participantId: editingRecord.id,
+      ip,
+      changes: values,
+      timestamp: new Date()
+    });
+
+    // 3) Simpan indikator di localStorage
+    localStorage.setItem(localKey, JSON.stringify({ date: today }));
+
+    notification.success({ message: 'Berhasil', description: 'Perubahan tersimpan.' });
+    fetchStats(new URLSearchParams(window.location.search).get('isAdmin') === 'true');
+    fetchPage(currentPage, pageSize);
+    setIsModalVisible(false);
+  } catch (err) {
+    console.error('Update failed:', err);
+    notification.error({ message: 'Error', description: 'Gagal menyimpan perubahan.' });
+  }
+};
+
+
 
   const handleCancel = () => setIsModalVisible(false);
 
@@ -225,6 +256,16 @@ export default function App() {
     { title: 'Sudah Join Group', dataIndex: 'sudahJoin', key: 'sudahJoin', render: v => (v ? 'Sudah' : 'Belum') },
     { title: 'Status GForm', dataIndex: 'gForm', key: 'gForm', render: v => (v ? 'Sudah Mengisi' : 'Belum Mengisi') },
     { title: 'Sudah Punya Rek. B. DKI', dataIndex: 'isOwnBankDKIAccount', key: 'isOwnBankDKIAccount', render: v => v === true ? 'Sudah Punya' : v === false ? 'Belum Punya' : 'Belum Menjawab' },
+    {
+      title: 'Minta Dibuatkan Rek. DKI',
+      dataIndex: 'inginDibuatkanRekening',
+      key: 'inginDibuatkanRekening',
+      render: v => {
+        if (v === true) return "Iya, saya bersedia";
+        if (v === false) return "Tidak";
+        return "Belum Menjawab";
+      }
+    },
     { title: 'Action', key: 'aksi', render: (_, r) => <Button type="link" onClick={() => showEditModal(r)}>Edit</Button> }
   ];
 
@@ -357,6 +398,16 @@ export default function App() {
             <Select placeholder="Pilih status">
               <Option value={true}>Sudah Punya</Option>
               <Option value={false}>Belum Punya</Option>
+            </Select>
+          </Form.Item>
+          <Form.Item
+            label="Apakah ingin dibuatkan rekening Bank DKI cabang Dinas Pendidikan?"
+            name="inginDibuatkanRekening"
+            rules={[{ required: true, message: 'Pilih jawaban!' }]}
+          >
+            <Select placeholder="Pilih jawaban">
+              <Option value={true}>Iya, saya bersedia</Option>
+              <Option value={false}>Tidak, saya sudah punya / saya akan buat sendiri</Option>
             </Select>
           </Form.Item>
         </Form>

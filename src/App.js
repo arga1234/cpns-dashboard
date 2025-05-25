@@ -24,13 +24,13 @@ const { Search } = Input;
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDq9BhFVqHaylTTJ2rURvYTZ7q5pUdE_Rw",
-  authDomain: "peserta-cpns-disdik.firebaseapp.com",
-  projectId: "peserta-cpns-disdik",
-  storageBucket: "peserta-cpns-disdik.firebasestorage.app",
-  messagingSenderId: "1046540445455",
-  appId: "1:1046540445455:web:44ea0964addf7fd163807a",
-  measurementId: "G-3RSWD9NFZG"
+  apiKey: "AIzaSyD-_mKHP7mV8OzVjau1edZ8j43vVa7zrQ0",
+  authDomain: "peserta-cpns-disdik-4bb1d.firebaseapp.com",
+  projectId: "peserta-cpns-disdik-4bb1d",
+  storageBucket: "peserta-cpns-disdik-4bb1d.firebasestorage.app",
+  messagingSenderId: "445511902833",
+  appId: "1:445511902833:web:2f998fd8e25d840e731dd0",
+  measurementId: "G-LLEW3JN75K"
 };
 
 // Initialize Firebase
@@ -113,8 +113,6 @@ export default function App() {
   // Fetch summary stats
   const fetchStats = async (isAdmin) => {
     try {
-      console.log("Fetching total count only for non-admin");
-
       const baseQ = buildFilteredQuery();
       if(isAdmin) {
       const totalSnap = await getCountFromServer(baseQ);
@@ -144,7 +142,6 @@ export default function App() {
 
   // Fetch paginated page
   const fetchPage = async (page, size) => {
-    console.log("Fetching page:", page);
     setLoading(true);
     try {
       let q = buildFilteredQuery();
@@ -177,12 +174,14 @@ export default function App() {
   // Show edit modal
   const showEditModal = record => {
     setEditingRecord(record);
-    console.log(record)
     form.setFieldsValue({
       sudahJoin: record.sudahJoin,
       gForm: record.gForm,
       isOwnBankDKIAccount: record.isOwnBankDKIAccount,
-      inginDibuatkanRekening: record.inginDibuatkanRekening || null
+      inginDibuatkanRekening:
+      record.inginDibuatkanRekening === undefined
+        ? null
+        : record.inginDibuatkanRekening
     });
     setIsModalVisible(true);
   };
@@ -375,7 +374,7 @@ const handleOk = async () => {
             name="sudahJoin"
             rules={[{ required: true, message: 'Pilih status join group!' }]}
           >
-            <Select placeholder="Pilih status">
+            <Select  placeholder="Pilih status">
               <Option value={true}>Sudah</Option>
               <Option value={false}>Belum</Option>
             </Select>
@@ -395,7 +394,7 @@ const handleOk = async () => {
             name="isOwnBankDKIAccount"
             rules={[{ required: true, message: 'Pilih status rekening bank DKI!' }]}
           >
-            <Select placeholder="Pilih status">
+            <Select disabled placeholder="Pilih status">
               <Option value={true}>Sudah Punya</Option>
               <Option value={false}>Belum Punya</Option>
             </Select>
@@ -405,7 +404,7 @@ const handleOk = async () => {
             name="inginDibuatkanRekening"
             rules={[{ required: true, message: 'Pilih jawaban!' }]}
           >
-            <Select placeholder="Pilih jawaban">
+            <Select disabled placeholder="Pilih jawaban">
               <Option value={true}>Iya, saya bersedia</Option>
               <Option value={false}>Tidak, saya sudah punya / saya akan buat sendiri</Option>
             </Select>
